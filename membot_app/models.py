@@ -17,10 +17,18 @@ class Lexem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.english} // {self.context} -- {self.russian}"
+        if self.context:
+            return f"{self.english} // {self.context} -- {self.russian}"
+        else:
+            return f"{self.english} -- {self.russian}"
 
 
-class EditQueue(models.Model):
+class EditQueueItem(models.Model):
+    user = models.ForeignKey(User, on_delete=CASCADE)
     raw = models.TextField()
-    old = models.ForeignKey(Lexem, on_delete=CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.raw
+
+

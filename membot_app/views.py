@@ -1,3 +1,4 @@
+import re
 from _md5 import md5
 
 from django.shortcuts import render
@@ -14,9 +15,13 @@ def on_message_received(request):
     data = request.POST
     user = get_user(request)
     text = data["text"]
-    context = text.split("//")[-1]
-    rest = "//".join(text.split("//")[:-1])
-    parts = rest.split("--")
+    if "//" in text:
+        context = text.split("//")[-1]
+        rest = "//".join(text.split("//")[:-1])
+    else:
+        context = None
+        rest = text
+    parts = re.split('\--|—', rest)
     if len(parts) == 2:
         part1 = parts[0]
         part2 = parts[1]
@@ -34,9 +39,18 @@ def on_message_received(request):
         else:
             english = part
             russian = None
-    lexem = models.Lexem(user=user, english=english, russian=russian, context=context)
-    lexem.save()
-    return Response(status=200, data=f"Lexem added: {str(lexem)}")
+    existant_rus, existant_eng = None, None
+    if russian:
+        existant_rus = list(models.Lexem.objects.filter(russian=russian, user=user))
+    if english:
+        existant_eng = list(models.Lexem.objects.filter(english=english, user=user))
+    if existant_rus or existant_eng:
+        models.EditQueueItem(user=user, raw=text).save()
+        return Response(status=200, data=f"Already have such item, added to edit queue")
+    else:
+        lexem = models.Lexem(user=user, english=strip_not_none(english), russian=strip_not_none(russian), context=strip_not_none(context))
+        lexem.save()
+        return Response(status=200, data=f"Lexem added: {str(lexem)}")
 
 
 @api_view(http_method_names=["POST"])
@@ -66,3 +80,9 @@ def is_russian(s):
             return True
     return False
 
+
+def strip_not_none(s):
+    if s:
+        return s.strip()
+    else:
+        return s
