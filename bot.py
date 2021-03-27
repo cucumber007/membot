@@ -59,7 +59,7 @@ class Bot:
     def start(self, update, context):
         try:
             # res = requests.post("http://127.0.0.1:8000/password/")
-            update.message.reply_text("Hi", reply_markup=self.main_markup)
+            update.message.reply_text("Hi. Use '<phrase> -- <phrase> // <context>' format to add items", reply_markup=self.main_markup)
         except Exception as e:
             update.message.reply_text("Error: " + str(e), reply_markup=self.main_markup)
 
@@ -90,6 +90,11 @@ class Bot:
             requests.post("http://127.0.0.1:8000/trigger_notifications/", {
                 "telegram_id": update.effective_user.id,
             })
+        if query.data == "stats":
+            res = requests.post("http://127.0.0.1:8000/stats/", {
+                "telegram_id": update.effective_user.id,
+            })
+            query.message.reply_text(res.text)
         if "mark" in query.data:
             requests.post("http://127.0.0.1:8000/mark/", {
                 "telegram_id": update.effective_user.id,
