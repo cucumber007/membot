@@ -2,11 +2,17 @@ import json
 
 import requests
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram.error import BadRequest
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, CallbackContext
 
 
-def send_notification(user, lexem):
-    pass
+def send_lexem_notification(user, lexem):
+    bot.tg_bot.send_message(chat_id=user.telegram_id, text=f"{lexem.id}|{lexem.english} -- {lexem.russian}",
+                            reply_markup=Bot.lexem_markup)
+
+
+def send_message(telegram_id, text):
+    bot.tg_bot.send_message(chat_id=telegram_id, text=text)
 
 
 class Bot:
@@ -15,23 +21,40 @@ class Bot:
     ]
     main_markup = InlineKeyboardMarkup(main_keyboard)
 
+    lexem_keyboard = [[
+        InlineKeyboardButton("Mark as remembered", callback_data='mark_remembered'),
+        InlineKeyboardButton("Mark as forgotten", callback_data='mark_forgotten'),
+    ], ] + main_keyboard
+    lexem_markup = InlineKeyboardMarkup(lexem_keyboard)
+
     commands_keyboard = [
-        [InlineKeyboardButton("Stats", callback_data='stats'), ],
+        [
+            InlineKeyboardButton("Stats", callback_data='stats'),
+            InlineKeyboardButton("Give me the word!", callback_data='trigger_notifications'),
+        ],
     ]
     commands_markup = InlineKeyboardMarkup(commands_keyboard)
 
+    def __init__(self):
+        print("Run bot")
+        self.tg_bot = None
+
     def run(self):
-        with open("local-properties.json", "r") as f:
-            token = json.loads(f.read())["token"]
-        updater = Updater(token=token, use_context=True)
-        dispatcher = updater.dispatcher
-        dispatcher.add_handler(CommandHandler("start", self.start))
-        dispatcher.add_handler(MessageHandler(filters=Filters.text, callback=self.message))
-        dispatcher.add_handler(CallbackQueryHandler(self.button))
+        try:
+            with open("local-properties.json", "r") as f:
+                token = json.loads(f.read())["token"]
+                updater = Updater(token=token, use_context=True)
+                dispatcher = updater.dispatcher
+                self.tg_bot = updater.bot
+                dispatcher.add_handler(CommandHandler("start", self.start))
+                dispatcher.add_handler(MessageHandler(filters=Filters.text, callback=self.message))
+                dispatcher.add_handler(CallbackQueryHandler(self.button))
 
-        # dispatcher.add_error_handler(self.handle_error)
+                # dispatcher.add_error_handler(self.handle_error)
 
-        updater.start_polling()
+                updater.start_polling()
+        except FileNotFoundError:
+            print("token not found")
 
     def start(self, update, context):
         try:
@@ -53,9 +76,26 @@ class Bot:
 
     def button(self, update, *args):
         query = update.callback_query
-        query.answer()
+        try:
+            query.answer()
+        except BadRequest as e:
+            if "Query is too old" in str(e):
+                pass
+            else:
+                raise e
+
         if query.data == "show_commands":
             query.message.reply_text("Commands:", reply_markup=self.commands_markup)
+        if query.data == "trigger_notifications":
+            requests.post("http://127.0.0.1:8000/trigger_notifications/", {
+                "telegram_id": update.effective_user.id,
+            })
+        if "mark" in query.data:
+            requests.post("http://127.0.0.1:8000/mark/", {
+                "telegram_id": update.effective_user.id,
+                "lexem_id": update.effective_message.text.split("|")[0],
+                "state": query.data
+            })
         # query.edit_message_text(text=f"Selected option: {query.data}")
 
 

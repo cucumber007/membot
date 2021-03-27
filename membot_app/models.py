@@ -19,7 +19,7 @@ class Lexem(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super().save(force_insert, force_update, using, update_fields)
-        Memorization(self.user, self, 0, timezone.now())
+        Memorization(user=self.user, lexem=self, interval_stage=0, notify_at=timezone.now()).save()
 
     def __str__(self):
         if self.context:

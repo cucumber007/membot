@@ -1,3 +1,4 @@
+import datetime
 import re
 from _md5 import md5
 
@@ -64,14 +65,43 @@ def set_password(request):
     return Response(status=200)
 
 
-@api_view(http_method_names=["GET"])
+@api_view(http_method_names=["POST"])
 def trigger_notifications(request):
-    users = models.User.objects.all()
+    data = request.POST
+    telegram_id = data.get("telegram_id")
+    if not telegram_id:
+        users = models.User.objects.all()
+    else:
+        users = models.User.objects.filter(telegram_id=telegram_id)
+
     lexems = list(models.Lexem.objects.filter(memorization__notify_at__lte=timezone.now()))
     for user in users:
-        lexem = map(lambda x: x.user.id == user.id, lexems).__next__()
-        if lexem:
-            bot.send_notification(user, lexem)
+        lexems_to_update = list(filter(lambda x: x.user.id == user.id, lexems))
+        if lexems_to_update:
+            bot.send_lexem_notification(user, lexems_to_update[0])
+        elif telegram_id:
+            bot.send_message(telegram_id, "No words for you yet")
+
+    return Response(status=200)
+
+
+@api_view(http_method_names=["POST"])
+def mark(request):
+    data = request.POST
+    telegram_id = data.get("telegram_id")
+    lexem_id = int(data["lexem_id"])
+    mem = models.Memorization.objects.get(lexem_id=lexem_id)
+    if data["state"] == "mark_remembered":
+        plus_days = get_plusdays_for_next_stage(mem.interval_stage)
+        mem.notify_at += datetime.timedelta(days=plus_days)
+        mem.interval_stage += 1
+        mem.save()
+        bot.send_message(telegram_id, f"I'll reask you in {plus_days} days")
+    else:
+        mem.interval_stage = 0
+        mem.notify_at = timezone.now()
+        mem.save()
+        bot.send_message(telegram_id, f"Memorization value of this word has been reset")
     return Response(status=200)
 
 
@@ -99,3 +129,14 @@ def strip_not_none(s):
         return s.strip()
     else:
         return s
+
+def get_plusdays_for_next_stage(prev_stage):
+    res = {
+        0: 1,
+        1: 2,
+        2: 14,
+        3: 60,
+    }.get(prev_stage)
+    if res is None:
+        res = 60
+    return res
