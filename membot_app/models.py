@@ -22,7 +22,7 @@ class Lexem(models.Model):
         Memorization(user=self.user, lexem=self, interval_stage=0, notify_at=timezone.now()).save()
 
     def __str__(self):
-        if self.context:
+        if self.context is not None:
             return f"{self.english} // {self.context} -- {self.russian}"
         else:
             return f"{self.english} -- {self.russian}"

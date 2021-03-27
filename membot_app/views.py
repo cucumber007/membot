@@ -24,7 +24,7 @@ def on_message_received(request):
     else:
         context = None
         rest = text
-    parts = re.split('\--|—', rest)
+    parts = re.split('\--|—| - ', rest)
     if len(parts) == 2:
         part1 = parts[0]
         part2 = parts[1]
@@ -51,7 +51,8 @@ def on_message_received(request):
         models.EditQueueItem(user=user, raw=text).save()
         return Response(status=200, data=f"Already have such item, added to edit queue")
     else:
-        lexem = models.Lexem(user=user, english=strip_not_none(english), russian=strip_not_none(russian), context=strip_not_none(context))
+        lexem = models.Lexem(user=user, english=strip_not_none(english), russian=strip_not_none(russian),
+                             context=strip_not_none(context))
         lexem.save()
         return Response(status=200, data=f"Lexem added: {str(lexem)}")
 
@@ -140,9 +141,10 @@ def is_russian(s):
 
 def strip_not_none(s):
     if s:
-        return s.strip()
+        return s.lower().strip()
     else:
         return s
+
 
 def get_plusdays_for_next_stage(prev_stage):
     res = {
