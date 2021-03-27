@@ -4,9 +4,11 @@ from _md5 import md5
 from django.shortcuts import render
 
 # Create your views here.
+from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+import bot
 from membot_app import models
 
 
@@ -59,6 +61,17 @@ def set_password(request):
     user = get_user(request)
     user.password_hash = md5(data["password"])
     user.save()
+    return Response(status=200)
+
+
+@api_view(http_method_names=["GET"])
+def trigger_notifications(request):
+    users = models.User.objects.all()
+    lexems = list(models.Lexem.objects.filter(memorization__notify_at__lte=timezone.now()))
+    for user in users:
+        lexem = map(lambda x: x.user.id == user.id, lexems).__next__()
+        if lexem:
+            bot.send_notification(user, lexem)
     return Response(status=200)
 
 

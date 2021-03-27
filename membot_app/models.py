@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import CASCADE
+from django.utils import timezone
 
 
 class User(models.Model):
@@ -16,6 +17,10 @@ class Lexem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+        Memorization(self.user, self, 0, timezone.now())
+
     def __str__(self):
         if self.context:
             return f"{self.english} // {self.context} -- {self.russian}"
@@ -30,5 +35,13 @@ class EditQueueItem(models.Model):
 
     def __str__(self):
         return self.raw
+
+
+class Memorization(models.Model):
+    user = models.ForeignKey(User, on_delete=CASCADE)
+    lexem = models.ForeignKey(Lexem, on_delete=CASCADE)
+    interval_stage = models.IntegerField()
+    notify_at = models.DateTimeField()
+
 
 
