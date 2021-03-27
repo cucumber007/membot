@@ -59,7 +59,7 @@ class Bot:
     def start(self, update, context):
         try:
             # res = requests.post("http://127.0.0.1:8000/password/")
-            update.message.reply_text("Hi. \n Use '<phrase> -- <phrase> // <context>' format to add items \n Admin: http://membot.sytes.net/admin", reply_markup=self.main_markup)
+            update.message.reply_text("Hi. \n Use '<phrase> -- <phrase> // <context>' format to add items \n Admin: http://membot.sytes.net:8000/admin", reply_markup=self.main_markup)
         except Exception as e:
             update.message.reply_text("Error: " + str(e), reply_markup=self.main_markup)
 
