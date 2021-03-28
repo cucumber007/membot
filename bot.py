@@ -1,6 +1,7 @@
 import json
 
 import requests
+import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.error import BadRequest
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, CallbackContext
@@ -30,6 +31,7 @@ class Bot:
     commands_keyboard = [
         [
             InlineKeyboardButton("Stats", callback_data='stats'),
+            InlineKeyboardButton("Backup", callback_data='backup'),
             InlineKeyboardButton("Give me the word!", callback_data='trigger_notifications'),
         ],
     ]
@@ -95,6 +97,15 @@ class Bot:
                 "telegram_id": update.effective_user.id,
             })
             query.message.reply_text(res.text)
+        if query.data == "backup":
+            res = requests.post("http://127.0.0.1:8000/backup/", {
+                "telegram_id": update.effective_user.id,
+            })
+            if res.status_code != 200:
+                raise Exception(res.text)
+            data = json.loads(res.text[1:-1].replace('\\"', '"'))
+            datas = json.dumps(data, indent=4)
+            query.message.reply_text(f"```{datas}```", parse_mode=telegram.ParseMode.MARKDOWN_V2)
         if "mark" in query.data:
             requests.post("http://127.0.0.1:8000/mark/", {
                 "telegram_id": update.effective_user.id,

@@ -7,10 +7,11 @@ from django.shortcuts import render
 # Create your views here.
 from django.utils import timezone
 from rest_framework.decorators import api_view
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 import bot
-from membot_app import models
+from membot_app import models, serializers
 
 
 @api_view(http_method_names=["POST"])
@@ -118,6 +119,23 @@ def stats(request):
         "edit_queue_size": len(edit_queue),
         "next_word_notification": mem[0].notify_at.strftime("%b %d, %H:%M"),
     })
+
+
+@api_view(http_method_names=["POST"])
+def backup(request):
+    data = request.POST
+    user = get_user(request)
+    lexems = models.Lexem.objects.filter(user=user)
+    edit_queue = models.EditQueueItem.objects.filter(user=user)
+    mems = models.Memorization.objects.filter(user=user)
+
+    ser = serializers.BackupSerializer({
+        "lexems": lexems,
+        "edit_queue": edit_queue,
+        "memorizations": mems,
+    })
+
+    return Response(status=200, data=JSONRenderer().render(ser.data))
 
 
 def get_user(request):

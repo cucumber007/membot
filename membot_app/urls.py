@@ -8,4 +8,5 @@ urlpatterns = [
     path('trigger_notifications/', views.trigger_notifications),
     path('mark/', views.mark),
     path('stats/', views.stats),
+    path('backup/', views.backup),
 ]
