@@ -1,2 +1,2 @@
-cp ../db.sqlite3 ../../backup/membot/db.sqlite3
-date > ../../backup/membot/backup_log.txt
+cp ~/projects/membot/db.sqlite3 ~/projects/backup/membot/db.sqlite3
+date > ~/projects/backup/membot/backup_log.txt

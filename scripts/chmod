@@ -4,3 +4,4 @@ chmod 777 mig
 chmod 777 prepopulate
 chmod 777 run
 chmod 777 superuser
+chmod 777 backup
