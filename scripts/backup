@@ -1,0 +1,2 @@
+cp ../db.sqlite3 ../../backup/membot/db.sqlite3
+date > ../../backup/membot/backup_log.txt
