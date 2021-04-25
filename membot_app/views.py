@@ -15,7 +15,7 @@ from membot_app import models, serializers
 
 
 @api_view(http_method_names=["POST"])
-def on_message_received(request):
+def on_lexem_received(request):
     data = request.POST
     user = get_user(request)
     text = data["text"]

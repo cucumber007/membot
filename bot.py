@@ -67,7 +67,7 @@ class Bot:
 
     def message(self, update, context):
         try:
-            res = requests.post("http://127.0.0.1:8000/message_hook/", {
+            res = requests.post("http://127.0.0.1:8000/api/message_hook/", {
                 "telegram_id": update.effective_user.id,
                 "telegram_username": update.effective_user.username,
                 "text": update.effective_message.text,
@@ -89,16 +89,16 @@ class Bot:
         if query.data == "show_commands":
             query.message.reply_text("Commands:", reply_markup=self.commands_markup)
         if query.data == "trigger_notifications":
-            requests.post("http://127.0.0.1:8000/trigger_notifications/", {
+            requests.post("http://127.0.0.1:8000/api/trigger_notifications/", {
                 "telegram_id": update.effective_user.id,
             })
         if query.data == "stats":
-            res = requests.post("http://127.0.0.1:8000/stats/", {
+            res = requests.post("http://127.0.0.1:8000/api/stats/", {
                 "telegram_id": update.effective_user.id,
             })
             query.message.reply_text(res.text)
         if query.data == "backup":
-            res = requests.post("http://127.0.0.1:8000/backup/", {
+            res = requests.post("http://127.0.0.1:8000/api/backup/", {
                 "telegram_id": update.effective_user.id,
             })
             if res.status_code != 200:
@@ -107,7 +107,7 @@ class Bot:
             datas = json.dumps(data, indent=4)
             query.message.reply_text(f"```{datas}```", parse_mode=telegram.ParseMode.MARKDOWN_V2)
         if "mark" in query.data:
-            requests.post("http://127.0.0.1:8000/mark/", {
+            requests.post("http://127.0.0.1:8000/api/mark/", {
                 "telegram_id": update.effective_user.id,
                 "lexem_id": update.effective_message.text.split("|")[0],
                 "state": query.data

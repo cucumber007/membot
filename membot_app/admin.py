@@ -4,8 +4,21 @@ from django.contrib import admin
 from membot_app import models
 
 admin.site.register(models.User)
-admin.site.register(models.Lexem)
-admin.site.register(models.Memorization)
+
+
+class LexemAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'english', 'russian', 'context')
+
+
+admin.site.register(models.Lexem, LexemAdmin)
+
+
+class MemorizationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'lexem', 'interval_stage', 'notify_at')
+
+
+admin.site.register(models.Memorization, MemorizationAdmin)
+
 
 class EditQueueAdmin(admin.ModelAdmin):
     list_display = ('raw', 'lexems')
