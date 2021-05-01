@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.db.models import CASCADE
 from django.utils import timezone
@@ -6,7 +8,13 @@ from django.utils import timezone
 class User(models.Model):
     telegram_id = models.CharField(max_length=64)
     telegram_username = models.CharField(max_length=64)
+    timezone_offset_seconds = models.IntegerField(default=0)
+    last_notification = models.DateTimeField()
+    notification_period_minutes = models.IntegerField(default=3*60)
     password_hash = models.CharField(max_length=64, null=True, blank=True)
+
+    def get_next_notification(self):
+        return self.last_notification + datetime.timedelta(minutes=self.notification_period_minutes)
 
     def __str__(self):
         return self.telegram_username

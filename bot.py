@@ -1,10 +1,14 @@
 import json
+from datetime import timedelta
 
 import requests
 import telegram
+from django.utils import timezone
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.error import BadRequest
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, CallbackContext
+
+from membot import settings
 
 
 def send_lexem_notification(user, lexem):

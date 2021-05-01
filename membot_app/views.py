@@ -11,7 +11,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 import bot
-from membot_app import models, serializers
+from membot_app import models, serializers, interactor
 
 
 @api_view(http_method_names=["POST"])
@@ -71,20 +71,7 @@ def set_password(request):
 def trigger_notifications(request):
     data = request.POST
     telegram_id = data.get("telegram_id")
-    if not telegram_id:
-        users = models.User.objects.all()
-    else:
-        users = models.User.objects.filter(telegram_id=telegram_id)
-
-    lexems = list(models.Lexem.objects.filter(memorization__notify_at__lte=timezone.now()))
-    for user in users:
-        lexems_to_update = list(filter(lambda x: x.user.id == user.id, lexems))
-        if lexems_to_update:
-            bot.send_lexem_notification(user, lexems_to_update[0])
-        elif telegram_id:
-            bot.send_message(telegram_id, "No words for you yet")
-
-    return Response(status=200)
+    return interactor.notify_users(telegram_id)
 
 
 @api_view(http_method_names=["POST"])

@@ -1,4 +1,4 @@
 #h m dom m dow
-13 0 */1 * * curl -X POST http://membot.sytes.net:8000/api/trigger_notifications/ -i
+*/1 0 * * * curl -X POST http://membot.sytes.net:8000/api/trigger_notifications/ -i
 16 0 */1 * * bash /root/projects/membot/scripts/backup
 
