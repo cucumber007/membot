@@ -1,8 +1,5 @@
 from datetime import timedelta
 
-from dateutil import tz
-from dateutil.tz import tzlocal
-
 from django.utils import timezone
 from rest_framework.response import Response
 
