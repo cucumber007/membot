@@ -38,6 +38,20 @@ def should_trigger_notification(user):
     return timezone.now() > user.get_next_notification() and in_time_window
 
 
+def mark(telegram_id, mem, mark_remembered):
+    if mark_remembered:
+        plus_days = get_plusdays_for_next_stage(mem.interval_stage)
+        mem.notify_at = timezone.now() + timedelta(days=plus_days)
+        mem.interval_stage += 1
+        mem.save()
+        bot.send_message(telegram_id, f"I'll reask you in {plus_days} days")
+    else:
+        mem.interval_stage = 0
+        mem.notify_at = timezone.now()
+        mem.save()
+        bot.send_message(telegram_id, f"Memorization value of this word has been reset")
+
+
 def get_timezone(user):
     return timezone.get_fixed_timezone(timedelta_from_seconds(user.timezone_offset_seconds))
 
@@ -52,3 +66,40 @@ def timedelta_to_seconds(td):
 
 def timedelta_from_seconds(sec):
     return timedelta(sec / 86400)
+
+def get_user(request):
+    data = request.POST
+    user = models.User.objects.filter(telegram_id=data["telegram_id"]).first()
+    if not user:
+        user = models.User(
+            telegram_id=data["telegram_id"],
+            telegram_username=data["telegram_username"]
+        )
+        user.save()
+    return user
+
+
+def is_russian(s):
+    for i in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя":
+        if i in s:
+            return True
+    return False
+
+
+def strip_not_none(s):
+    if s:
+        return s.lower().strip()
+    else:
+        return s
+
+
+def get_plusdays_for_next_stage(prev_stage):
+    res = {
+        0: 1,
+        1: 2,
+        2: 14,
+        3: 60,
+    }.get(prev_stage)
+    if res is None:
+        res = 60
+    return res

@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 import bot
 from membot_app import models, serializers, interactor
+from membot_app.interactor import get_user, strip_not_none, is_russian
 
 
 @api_view(http_method_names=["POST"])
@@ -25,7 +26,7 @@ def on_lexem_received(request):
     else:
         context = None
         rest = text
-    parts = re.split('\--|—| - ', rest)
+    parts = re.split('--|—| - | -|- ', rest)
     if len(parts) == 2:
         part1 = parts[0]
         part2 = parts[1]
@@ -80,17 +81,10 @@ def mark(request):
     telegram_id = data.get("telegram_id")
     lexem_id = int(data["lexem_id"])
     mem = models.Memorization.objects.get(lexem_id=lexem_id)
-    if data["state"] == "mark_remembered":
-        plus_days = get_plusdays_for_next_stage(mem.interval_stage)
-        mem.notify_at += datetime.timedelta(days=plus_days)
-        mem.interval_stage += 1
-        mem.save()
-        bot.send_message(telegram_id, f"I'll reask you in {plus_days} days")
-    else:
-        mem.interval_stage = 0
-        mem.notify_at = timezone.now()
-        mem.save()
-        bot.send_message(telegram_id, f"Memorization value of this word has been reset")
+    mark_remembered = data["state"] == "mark_remembered"
+
+    interactor.mark(telegram_id, mem, mark_remembered)
+
     return Response(status=200)
 
 
@@ -125,39 +119,4 @@ def backup(request):
     return Response(status=200, data=JSONRenderer().render(ser.data))
 
 
-def get_user(request):
-    data = request.POST
-    user = models.User.objects.filter(telegram_id=data["telegram_id"]).first()
-    if not user:
-        user = models.User(
-            telegram_id=data["telegram_id"],
-            telegram_username=data["telegram_username"]
-        )
-        user.save()
-    return user
 
-
-def is_russian(s):
-    for i in "абвгдеёжзийклмнопрстуфхцчшщъыьэюя":
-        if i in s:
-            return True
-    return False
-
-
-def strip_not_none(s):
-    if s:
-        return s.lower().strip()
-    else:
-        return s
-
-
-def get_plusdays_for_next_stage(prev_stage):
-    res = {
-        0: 1,
-        1: 2,
-        2: 14,
-        3: 60,
-    }.get(prev_stage)
-    if res is None:
-        res = 60
-    return res
