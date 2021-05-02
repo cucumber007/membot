@@ -10,10 +10,11 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 
 from membot import settings
 from telegram_bot import keyboards
+from telegram_bot.formatters import LexemFormatter
 
 
 def send_lexem_notification(user, lexem):
-    bot.tg_bot.send_message(chat_id=user.telegram_id, text=f"{lexem.id}|{lexem.english} -- {lexem.russian}",
+    bot.tg_bot.send_message(chat_id=user.telegram_id, text=LexemFormatter(lexem).hidden_state(),
                             reply_markup=keyboards.lexem.markup)
 
 
