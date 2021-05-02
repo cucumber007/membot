@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework.response import Response
 
-import bot
+from telegram_bot import bot
 from membot_app import models
 
 START_TIME = 10

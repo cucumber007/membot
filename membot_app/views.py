@@ -1,16 +1,11 @@
-import datetime
 import re
 from _md5 import md5
 
-from django.shortcuts import render
-
 # Create your views here.
-from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
-import bot
 from membot_app import models, serializers, interactor
 from membot_app.interactor import get_user, strip_not_none, is_russian
 

@@ -9,11 +9,12 @@ from telegram.error import BadRequest
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, CallbackContext
 
 from membot import settings
+from telegram_bot import keyboards
 
 
 def send_lexem_notification(user, lexem):
     bot.tg_bot.send_message(chat_id=user.telegram_id, text=f"{lexem.id}|{lexem.english} -- {lexem.russian}",
-                            reply_markup=Bot.lexem_markup)
+                            reply_markup=keyboards.lexem.markup)
 
 
 def send_message(telegram_id, text):
@@ -21,26 +22,6 @@ def send_message(telegram_id, text):
 
 
 class Bot:
-    main_keyboard = [
-        [InlineKeyboardButton("Show commands", callback_data='show_commands'), ],
-    ]
-    main_markup = InlineKeyboardMarkup(main_keyboard)
-
-    lexem_keyboard = [[
-        InlineKeyboardButton("Mark as remembered", callback_data='mark_remembered'),
-        InlineKeyboardButton("Mark as forgotten", callback_data='mark_forgotten'),
-    ], ] + main_keyboard
-    lexem_markup = InlineKeyboardMarkup(lexem_keyboard)
-
-    commands_keyboard = [
-        [
-            InlineKeyboardButton("Stats", callback_data='stats'),
-            InlineKeyboardButton("Backup", callback_data='backup'),
-            InlineKeyboardButton("Give me the word!", callback_data='trigger_notifications'),
-        ],
-    ]
-    commands_markup = InlineKeyboardMarkup(commands_keyboard)
-
     def __init__(self):
         print("Run bot")
         self.tg_bot = None
@@ -67,7 +48,7 @@ class Bot:
             # res = requests.post("http://127.0.0.1:8000/password/")
             update.message.reply_text("Hi. \n Use '<phrase> -- <phrase> // <context>' format to add items \n Admin: http://membot.sytes.net:8000/admin", reply_markup=self.main_markup)
         except Exception as e:
-            update.message.reply_text("Error: " + str(e), reply_markup=self.main_markup)
+            update.message.reply_text("Error: " + str(e), reply_markup=keyboards.main.markup)
 
     def message(self, update, context):
         try:
@@ -76,9 +57,9 @@ class Bot:
                 "telegram_username": update.effective_user.username,
                 "text": update.effective_message.text,
             })
-            update.message.reply_text(res.text, reply_markup=self.main_markup)
+            update.message.reply_text(res.text, reply_markup=keyboards.main.markup)
         except Exception as e:
-            update.message.reply_text("Error: " + str(e), reply_markup=self.main_markup)
+            update.message.reply_text("Error: " + str(e), reply_markup=keyboards.main.markup)
 
     def button(self, update, *args):
         query = update.callback_query
@@ -91,7 +72,7 @@ class Bot:
                 raise e
 
         if query.data == "show_commands":
-            query.message.reply_text("Commands:", reply_markup=self.commands_markup)
+            query.message.reply_text("Commands:", reply_markup=keyboards.commands.markup)
         if query.data == "trigger_notifications":
             requests.post("http://127.0.0.1:8000/api/trigger_notifications/", {
                 "telegram_id": update.effective_user.id,
