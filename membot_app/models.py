@@ -32,6 +32,9 @@ class Lexem(models.Model):
         super().save(force_insert, force_update, using, update_fields)
         Memorization(user=self.user, lexem=self, interval_stage=0, notify_at=timezone.now()).save()
 
+    def is_full(self):
+        return self.russian and self.english
+
     def __str__(self):
         if self.context is not None:
             return f"{self.english} // {self.context} -- {self.russian}"

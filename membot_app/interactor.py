@@ -16,7 +16,12 @@ def notify_users(telegram_id):
     else:
         users = models.User.objects.filter(telegram_id=telegram_id)
 
-    lexems = list(models.Lexem.objects.filter(memorization__notify_at__lte=timezone.now()))
+    lexems = list(
+        models.Lexem.objects
+            .filter(memorization__notify_at__lte=timezone.now())
+            .filter(russian__isnull=False)
+            .filter(english__isnull=False)
+    )
     for user in users:
         if should_trigger_notification(user):
             lexems_to_update = list(filter(lambda x: x.user.id == user.id, lexems))
