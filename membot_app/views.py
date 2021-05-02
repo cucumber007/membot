@@ -113,5 +113,11 @@ def backup(request):
 
     return Response(status=200, data=JSONRenderer().render(ser.data))
 
-
-
+@api_view(http_method_names=["POST"])
+def show_answer(request):
+    data = request.POST
+    user = get_user(request)
+    lexem_id = data["lexem_id"]
+    message_id = data["message_id"]
+    interactor.show_answer(user, lexem_id, message_id)
+    return Response(status=200)

@@ -108,3 +108,8 @@ def get_plusdays_for_next_stage(prev_stage):
     if res is None:
         res = 60
     return res
+
+
+def show_answer(user, lexem_id, message_id):
+    lexem = models.Lexem.objects.filter(id=lexem_id).first()
+    bot.set_lexem_state_open(user, lexem, message_id)

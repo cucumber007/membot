@@ -14,9 +14,15 @@ main = Keyboard([
 ])
 
 lexem = Keyboard(main.buttons + [ [
+    InlineKeyboardButton("Show answer", callback_data='show_answer'),
+    InlineKeyboardButton("Mark as forgotten", callback_data='mark_forgotten'),
+]])
+
+lexem_open = Keyboard(main.buttons + [ [
     InlineKeyboardButton("Mark as remembered", callback_data='mark_remembered'),
     InlineKeyboardButton("Mark as forgotten", callback_data='mark_forgotten'),
 ]])
+
 
 # lexem = Keyboard(lexem_keyboard)
 
