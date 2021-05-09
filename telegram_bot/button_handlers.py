@@ -58,6 +58,8 @@ handlers = {
     "stats": stats,
     "backup": backup,
     "show_answer": show_answer,
+    "mark_remembered": mark,
+    "mark_forgotten": mark,
 }
 
 
@@ -67,6 +69,3 @@ def handle(update, query):
         handler(update, query)
     else:
         raise Exception(f"No handler for '{query.data}' button")
-
-    if "mark" in query.data:
-        mark(update, query)
