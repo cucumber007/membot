@@ -30,7 +30,7 @@ def stats(update, query):
         if k == "stages":
             for stage, sv in v.items():
                 stage = int(stage)
-                message += f"\t{stage} ({interactor.get_plusdays_for_next_stage(stage-1)} d) - {round(sv/float(total_lexems_quantity)*100)} %\n"
+                message += f"\t{stage} ({interactor.get_plusdays_for_next_stage(stage - 1)} d) - {round(sv / float(total_lexems_quantity) * 100)} %\n"
         else:
             message += f"{format_underscore(k)}: {v}\n"
 
@@ -71,6 +71,11 @@ def url(update, query):
     query.message.reply_text(settings.ADMIN_URL)
 
 
+def edit_lexem(update, query):
+    lexem_id = update.effective_message.text.split("|")[0]
+    query.message.reply_text(settings.ADMIN_URL+f"membot_app/lexem/{lexem_id}/change/")
+
+
 handlers = {
     "show_commands": show_commands,
     "trigger_notifications": trigger_notifications,
@@ -80,6 +85,7 @@ handlers = {
     "mark_remembered": mark,
     "mark_forgotten": mark,
     "url": url,
+    "edit_lexem": edit_lexem,
 }
 
 
