@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework.response import Response
 
+from membot_app.utils import format_datetime
 from telegram_bot import bot
 from membot_app import models
 
@@ -36,7 +37,7 @@ def notify_users(telegram_id):
 
 
 def should_trigger_notification(user, manual=False):
-    user_local_dt = timezone.now().astimezone(get_timezone(user))
+    user_local_dt = timezone.now().astimezone(user.get_timezone())
     print(user_local_dt)
     in_time_window = END_TIME > user_local_dt.hour > START_TIME
     is_time = timezone.now() > user.get_next_notification()
@@ -50,7 +51,7 @@ def should_trigger_notification(user, manual=False):
         if not is_time:
             bot.send_message(
                 user.telegram_id,
-                f"No time for notification yet: {user.get_next_notification().astimezone(get_timezone(user))}"
+                f"No time for notification yet: {user.get_next_notification().astimezone(user.get_timezone())}"
             )
     return res
 
@@ -69,20 +70,39 @@ def mark(telegram_id, mem, mark_remembered):
         bot.send_message(telegram_id, f"Memorization value of this word has been reset")
 
 
-def get_timezone(user):
-    return timezone.get_fixed_timezone(timedelta_from_seconds(user.timezone_offset_seconds))
+def get_stats(user):
+    lexems = models.Lexem.objects.filter(user=user).all()
+    memorizations = models.Memorization.objects.filter(user=user).all()
+
+    total_lexems_quantity = lexems.count()
+
+    stages = {}
+    max_interval_stage = memorizations.order_by("-interval_stage").first().interval_stage
+    if max_interval_stage is None:
+        max_interval_stage = 0
+    for i in range(0, max_interval_stage):
+        count = lexems.filter(memorization__interval_stage=i).count()
+        stages[i] = count
+
+    edit_queue = models.EditQueueItem.objects.count()
+
+    data = {
+        "total_lexems_quantity": total_lexems_quantity,
+        "stages": stages,
+        "edit_queue_size": edit_queue,
+        "next_notification": format_datetime(user.get_next_notification().astimezone(user.get_timezone())),
+    }
+
+    mem = memorizations.order_by("notify_at").first()
+    if mem:
+        data["next_word_notification"] = format_datetime(mem.notify_at)
+    print(data)
+    return Response(status=200, data=data)
 
 
 def is_debug(user):
     return user.telegram_username == "spqrta"
 
-
-def timedelta_to_seconds(td):
-    return td.days * 86400 + td.seconds
-
-
-def timedelta_from_seconds(sec):
-    return timedelta(sec / 86400)
 
 def get_user(request):
     data = request.POST

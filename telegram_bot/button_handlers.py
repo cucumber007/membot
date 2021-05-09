@@ -4,6 +4,7 @@ import requests
 import telegram
 
 from membot import settings
+from membot_app.utils import format_underscore
 from telegram_bot import keyboards
 
 
@@ -21,7 +22,18 @@ def stats(update, query):
     res = requests.post("http://127.0.0.1:8000/api/stats/", {
         "telegram_id": update.effective_user.id,
     })
-    query.message.reply_text(res.text)
+    message = ""
+    data = json.loads(res.text)
+    total_lexems_quantity = data["total_lexems_quantity"]
+    for k, v in data.items():
+        if k == "stages":
+            for stage, sv in v.items():
+                message += f"\t{stage} - {round(sv/float(total_lexems_quantity)*100)}%\n"
+        else:
+            message += f"{format_underscore(k)}: {v}\n"
+
+    # formatted = json.dumps(, indent=4, ensure_ascii=False)
+    query.message.reply_text(f"```\n{message} ```", parse_mode=telegram.ParseMode.MARKDOWN_V2)
 
 
 def backup(update, query):

@@ -85,16 +85,8 @@ def mark(request):
 
 @api_view(http_method_names=["POST"])
 def stats(request):
-    data = request.POST
     user = get_user(request)
-    lexems = models.Lexem.objects.all()[:10]
-    edit_queue = models.EditQueueItem.objects.all()[:10]
-    mem = models.Memorization.objects.all().order_by("notify_at")[:10]
-    return Response(status=200, data={
-        "lexems_quantity": len(lexems),
-        "edit_queue_size": len(edit_queue),
-        "next_word_notification": mem[0].notify_at.strftime("%b %d, %H:%M"),
-    })
+    return interactor.get_stats(user)
 
 
 @api_view(http_method_names=["POST"])

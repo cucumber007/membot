@@ -4,6 +4,8 @@ from django.db import models
 from django.db.models import CASCADE
 from django.utils import timezone
 
+from membot_app.utils import timedelta_from_seconds
+
 
 class User(models.Model):
     telegram_id = models.CharField(max_length=64)
@@ -15,6 +17,9 @@ class User(models.Model):
 
     def get_next_notification(self):
         return self.last_notification + datetime.timedelta(minutes=self.notification_period_minutes)
+
+    def get_timezone(user):
+        return timezone.get_fixed_timezone(timedelta_from_seconds(user.timezone_offset_seconds))
 
     def __str__(self):
         return self.telegram_username
