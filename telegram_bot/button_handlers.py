@@ -4,6 +4,7 @@ import requests
 import telegram
 
 from membot import settings
+from membot_app import interactor
 from membot_app.utils import format_underscore
 from telegram_bot import keyboards
 
@@ -28,7 +29,8 @@ def stats(update, query):
     for k, v in data.items():
         if k == "stages":
             for stage, sv in v.items():
-                message += f"\t{stage} - {round(sv/float(total_lexems_quantity)*100)}%\n"
+                stage = int(stage)
+                message += f"\t{stage} ({interactor.get_plusdays_for_next_stage(stage-1)} d) - {round(sv/float(total_lexems_quantity)*100)} %\n"
         else:
             message += f"{format_underscore(k)}: {v}\n"
 

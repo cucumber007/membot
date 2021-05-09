@@ -46,12 +46,13 @@ def should_trigger_notification(user, manual=False):
         if not in_time_window:
             bot.send_message(
                 user.telegram_id,
-                f"Not in time window: {user_local_dt} ({START_TIME}-{END_TIME})"
+                f"Not in time window: {format_datetime(user_local_dt)} ({START_TIME}-{END_TIME})"
             )
         if not is_time:
+            dt = format_datetime(user.get_next_notification().astimezone(user.get_timezone()))
             bot.send_message(
                 user.telegram_id,
-                f"No time for notification yet: {user.get_next_notification().astimezone(user.get_timezone())}"
+                f"No time for notification yet: {dt}"
             )
     return res
 
@@ -101,7 +102,7 @@ def get_stats(user):
 
 
 def is_debug(user):
-    return user.telegram_username == "spqrta"
+    return user.telegram_username in ["spqrta", "alinamanulova"]
 
 
 def get_user(request):
@@ -131,6 +132,8 @@ def strip_not_none(s):
 
 
 def get_plusdays_for_next_stage(prev_stage):
+    if prev_stage < 0:
+        return 0
     res = {
         0: 1,
         1: 2,
