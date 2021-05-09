@@ -36,7 +36,8 @@ def notify_users(telegram_id):
 
 
 def should_trigger_notification(user):
-    user_local_dt = user.last_notification.astimezone(get_timezone(user))
+    user_local_dt = timezone.now().astimezone(get_timezone(user))
+    print(user_local_dt)
     in_time_window = END_TIME > user_local_dt.hour > START_TIME
     is_time = timezone.now() > user.get_next_notification()
     res = is_time and in_time_window
@@ -44,7 +45,7 @@ def should_trigger_notification(user):
         if not in_time_window:
             bot.send_message(
                 user.telegram_id,
-                f"Not in time window: {timezone.now().astimezone(get_timezone(user))} ({START_TIME}-{END_TIME})"
+                f"Not in time window: {user_local_dt} ({START_TIME}-{END_TIME})"
             )
         if not is_time:
             bot.send_message(
