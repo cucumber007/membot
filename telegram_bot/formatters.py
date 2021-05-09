@@ -8,18 +8,20 @@ class LexemFormatter:
         self.lexem = lexem
 
     def hidden_state(self):
-        res = f"{self.lexem.id}| "
+        res = f"{self.lexem.id}|\n"
         if random.randint(0, 1):
             res += str(self.lexem.russian)
         else:
             res += str(self.lexem.english)
-        res += f"\n({self.lexem.context})"
+        if self.lexem.context:
+            res += f"\n({self.lexem.context})"
         return res
 
     def open_state(self):
-        res = f"{self.lexem.id}| "
+        res = f"{self.lexem.id}|\n"
         res += str(self.lexem.russian)
-        res += " - "
+        res += "\n\n - "
         res += str(self.lexem.english)
-        res += f"\n({self.lexem.context})"
+        if self.lexem.context:
+            res += f"\n({self.lexem.context})"
         return res
