@@ -23,7 +23,7 @@ def notify_users(telegram_id):
             .filter(english__isnull=False)
     )
     for user in users:
-        if should_trigger_notification(user):
+        if should_trigger_notification(user, manual=(telegram_id is not None)):
             lexems_to_update = list(filter(lambda x: x.user.id == user.id, lexems))
             if lexems_to_update:
                 bot.send_lexem_notification(user, lexems_to_update[0])
@@ -35,13 +35,13 @@ def notify_users(telegram_id):
     return Response(status=200)
 
 
-def should_trigger_notification(user):
+def should_trigger_notification(user, manual=False):
     user_local_dt = timezone.now().astimezone(get_timezone(user))
     print(user_local_dt)
     in_time_window = END_TIME > user_local_dt.hour > START_TIME
     is_time = timezone.now() > user.get_next_notification()
     res = is_time and in_time_window
-    if not res and is_debug(user):
+    if not res and is_debug(user) and manual:
         if not in_time_window:
             bot.send_message(
                 user.telegram_id,
