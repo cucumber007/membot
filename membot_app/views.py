@@ -1,13 +1,16 @@
+import json
 import re
 from _md5 import md5
 
 # Create your views here.
+from django.views.generic import TemplateView
 from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from membot_app import models, serializers, interactor
 from membot_app.interactor import get_user, strip_not_none, is_russian
+from membot_app.utils import decrypt
 
 
 @api_view(http_method_names=["POST"])
@@ -114,3 +117,17 @@ def show_answer(request):
     message_id = data["message_id"]
     interactor.show_answer(user, lexem_id, message_id)
     return Response(status=200)
+
+
+class EditQueueView(TemplateView):
+    template_name = "edit_queue.html"
+
+    def get(self, request, *args, **kwargs):
+        self.data = json.loads(decrypt(request.GET["p"]))
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['data'] = self.data
+        context['edit_queue'] = self.data
+        return context

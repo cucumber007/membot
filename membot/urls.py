@@ -15,8 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
+
+from membot_app import views
 
 urlpatterns = [
     path('', admin.site.urls),
     path('api/', include('membot_app.urls')),
+    path('edit_queue/', views.EditQueueView.as_view()),
 ]

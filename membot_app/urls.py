@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 
 from membot_app import views
 from django.contrib import admin
@@ -11,4 +12,5 @@ urlpatterns = [
     path('show_answer/', views.show_answer),
     path('stats/', views.stats),
     path('backup/', views.backup),
+
 ]

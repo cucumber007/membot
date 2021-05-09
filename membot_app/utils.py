@@ -1,3 +1,4 @@
+import base64
 from datetime import timedelta
 
 
@@ -17,3 +18,12 @@ def format_underscore(s):
 
 def format_datetime(dt):
     return dt.strftime("%b %d, %H:%M")
+
+
+# lol
+def encrypt(s):
+    return base64.b64encode(base64.b64encode(base64.b64encode(s)))
+
+
+def decrypt(s):
+    return base64.b64decode(base64.b64decode(base64.b64decode(s)))
