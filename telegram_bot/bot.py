@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import requests
 import telegram
+
 from django.utils import timezone
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.error import BadRequest
@@ -54,8 +55,8 @@ class Bot:
         try:
             # res = requests.post("http://127.0.0.1:8000/password/")
             update.message.reply_text(
-                "Hi. \n Use '<phrase> -- <phrase> // <context>' format to add items \n Admin: http://membot.sytes.net:8000/admin",
-                reply_markup=self.main_markup)
+                f"Hi. \n Use '<phrase> -- <phrase> // <context>' format to add items \n Admin: {settings.ADMIN_URL}",
+                reply_markup=keyboards.main.markup)
         except Exception as e:
             update.message.reply_text("Error: " + str(e), reply_markup=keyboards.main.markup)
 
