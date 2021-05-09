@@ -3,6 +3,7 @@ import json
 import requests
 import telegram
 
+from membot import settings
 from telegram_bot import keyboards
 
 
@@ -52,6 +53,10 @@ def mark(update, query):
     })
 
 
+def url(update, query):
+    query.message.reply_text(settings.ADMIN_URL)
+
+
 handlers = {
     "show_commands": show_commands,
     "trigger_notifications": trigger_notifications,
@@ -60,6 +65,7 @@ handlers = {
     "show_answer": show_answer,
     "mark_remembered": mark,
     "mark_forgotten": mark,
+    "url": url,
 }
 
 
