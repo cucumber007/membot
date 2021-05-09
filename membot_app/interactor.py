@@ -36,7 +36,6 @@ def notify_users(telegram_id):
 
 
 def should_trigger_notification(user):
-    loggers
     user_local_dt = user.last_notification.astimezone(get_timezone(user))
     in_time_window = END_TIME > user_local_dt.hour > START_TIME
     is_time = timezone.now() > user.get_next_notification()
