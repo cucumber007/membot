@@ -9,7 +9,7 @@ from telegram.error import BadRequest
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, CallbackContext
 
 from membot import settings
-from telegram_bot import keyboards
+from telegram_bot import keyboards, button_handlers
 from telegram_bot.formatters import LexemFormatter
 
 
@@ -81,41 +81,10 @@ class Bot:
                 else:
                     raise e
 
-            if query.data == "show_commands":
-                query.message.reply_text("Commands:", reply_markup=keyboards.commands.markup)
-            if query.data == "trigger_notifications":
-                requests.post("http://127.0.0.1:8000/api/trigger_notifications/", {
-                    "telegram_id": update.effective_user.id,
-                })
-            if query.data == "stats":
-                res = requests.post("http://127.0.0.1:8000/api/stats/", {
-                    "telegram_id": update.effective_user.id,
-                })
-                query.message.reply_text(res.text)
-            if query.data == "backup":
-                res = requests.post("http://127.0.0.1:8000/api/backup/", {
-                    "telegram_id": update.effective_user.id,
-                })
-                if res.status_code != 200:
-                    raise Exception(res.text)
-                data = json.loads(res.text[1:-1].replace('\\"', '"'))
-                datas = json.dumps(data, indent=4)
-                query.message.reply_text(f"```{datas}```", parse_mode=telegram.ParseMode.MARKDOWN_V2)
-            if query.data == "show_answer":
-                res = requests.post("http://127.0.0.1:8000/api/show_answer/", {
-                    "telegram_id": update.effective_user.id,
-                    "message_id": update.effective_message.message_id,
-                    "lexem_id": update.effective_message.text.split("|")[0],
-                })
-                if res.status_code != 200:
-                    raise Exception(res.text)
-            if "mark" in query.data:
-                requests.post("http://127.0.0.1:8000/api/mark/", {
-                    "telegram_id": update.effective_user.id,
-                    "lexem_id": update.effective_message.text.split("|")[0],
-                    "state": query.data
-                })
-        # query.edit_message_text(text=f"Selected option: {query.data}")
+            button_handlers.handle(update, query)
+
+
+            # query.edit_message_text(text=f"Selected option: {query.data}")
         except Exception as e:
             text = "Error: " + str(e)
             if len(text) > 1024:

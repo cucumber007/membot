@@ -36,4 +36,5 @@ commands = Keyboard([[
     InlineKeyboardButton("Give me the word!", callback_data='trigger_notifications'),
     InlineKeyboardButton("Stats", callback_data='stats'),
     InlineKeyboardButton("Backup", callback_data='backup'),
+    InlineKeyboardButton("Admin URL", callback_data='url'),
 ]])
