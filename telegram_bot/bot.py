@@ -42,6 +42,7 @@ class Bot:
                 dispatcher = updater.dispatcher
                 self.tg_bot = updater.bot
                 dispatcher.add_handler(CommandHandler("start", self.start))
+                dispatcher.add_handler(CommandHandler("trigger_notifications", self.trigger_notifications))
                 dispatcher.add_handler(MessageHandler(filters=Filters.text, callback=self.message))
                 dispatcher.add_handler(CallbackQueryHandler(self.button))
 
@@ -55,8 +56,22 @@ class Bot:
         try:
             # res = requests.post("http://127.0.0.1:8000/password/")
             update.message.reply_text(
-                f"Hi. \n Use '<phrase> -- <phrase> // <context>' format to add items \n Admin: {settings.ADMIN_URL}",
+                f"""
+                Hi. 
+                \nUse '<phrase> -- <phrase> // <context>' format to add items
+                \nAdmin: {settings.ADMIN_URL}" 
+                \nCommands:
+                \n/trigger_notifications
+                """,
                 reply_markup=keyboards.main.markup)
+        except Exception as e:
+            update.message.reply_text("Error: " + str(e), reply_markup=keyboards.main.markup)
+
+    def trigger_notifications(self, update, context):
+        try:
+            requests.post("http://127.0.0.1:8000/api/trigger_notifications/", {
+                "telegram_id": update.effective_user.id,
+            })
         except Exception as e:
             update.message.reply_text("Error: " + str(e), reply_markup=keyboards.main.markup)
 
@@ -71,7 +86,7 @@ class Bot:
         except Exception as e:
             update.message.reply_text("Error: " + str(e), reply_markup=keyboards.main.markup)
 
-    def button(self, update, *args):
+    def button(self, update):
         try:
             query = update.callback_query
             try:
@@ -83,7 +98,6 @@ class Bot:
                     raise e
 
             button_handlers.handle(update, query)
-
 
             # query.edit_message_text(text=f"Selected option: {query.data}")
         except Exception as e:
