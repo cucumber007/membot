@@ -86,7 +86,7 @@ class Bot:
         except Exception as e:
             update.message.reply_text("Error: " + str(e), reply_markup=keyboards.main.markup)
 
-    def button(self, update):
+    def button(self, update, *args):
         try:
             query = update.callback_query
             try:

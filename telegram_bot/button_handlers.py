@@ -13,8 +13,8 @@ def show_commands(update, query):
     query.message.reply_text("Commands:", reply_markup=keyboards.commands.markup)
 
 
-def trigger_notifications(update, query):
-    requests.post("http://127.0.0.1:8000/api/trigger_notifications/", {
+def give_me_the_word(update, query):
+    requests.post("http://127.0.0.1:8000/api/give_me_the_word/", {
         "telegram_id": update.effective_user.id,
     })
 
@@ -78,7 +78,7 @@ def edit_lexem(update, query):
 
 handlers = {
     "show_commands": show_commands,
-    "trigger_notifications": trigger_notifications,
+    "give_me_the_word": give_me_the_word,
     "stats": stats,
     "backup": backup,
     "show_answer": show_answer,

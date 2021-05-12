@@ -10,6 +10,19 @@ from membot_app import models
 START_TIME = 10
 END_TIME = 24
 
+def give_me_the_word(user):
+    lexems = get_lexems_for_notification(user=user)
+    return send_the_word(user, lexems, manual=True)
+
+
+def send_the_word(user, lexems_to_update, manual):
+    if lexems_to_update:
+        bot.send_lexem_notification(user, lexems_to_update[0])
+        user.last_notification = timezone.now()
+        user.save()
+    elif manual:
+        bot.send_message(user.telegram_id, "No words for you yet")
+
 
 def notify_users(telegram_id):
     if not telegram_id:
@@ -17,23 +30,24 @@ def notify_users(telegram_id):
     else:
         users = models.User.objects.filter(telegram_id=telegram_id)
 
-    lexems = list(
-        models.Lexem.objects
-            .filter(memorization__notify_at__lte=timezone.now())
-            .filter(russian__isnull=False)
-            .filter(english__isnull=False)
-    )
+    lexems = get_lexems_for_notification(user=None)
     for user in users:
         if should_trigger_notification(user, manual=(telegram_id is not None)):
             lexems_to_update = list(filter(lambda x: x.user.id == user.id, lexems))
-            if lexems_to_update:
-                bot.send_lexem_notification(user, lexems_to_update[0])
-                user.last_notification = timezone.now()
-                user.save()
-            elif telegram_id:
-                bot.send_message(telegram_id, "No words for you yet")
+            send_the_word(user, lexems_to_update, manual=False)
 
     return Response(status=200)
+
+
+def get_lexems_for_notification(user):
+    res = models.Lexem.objects\
+        .filter(memorization__notify_at__lte=timezone.now())\
+        .filter(russian__isnull=False)\
+        .filter(english__isnull=False)
+
+    if user:
+        res = res.filter(user=user)
+    return list(res)
 
 
 def should_trigger_notification(user, manual=False):

@@ -74,6 +74,12 @@ def trigger_notifications(request):
 
 
 @api_view(http_method_names=["POST"])
+def give_me_the_word(request):
+    user = get_user(request)
+    return interactor.give_me_the_word(user)
+
+
+@api_view(http_method_names=["POST"])
 def mark(request):
     data = request.POST
     telegram_id = data.get("telegram_id")

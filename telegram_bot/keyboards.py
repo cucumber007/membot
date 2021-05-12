@@ -37,7 +37,7 @@ lexem_keyboard = [[
 ], ]
 
 commands = Keyboard([[
-    InlineKeyboardButton("Give me the word!", callback_data='trigger_notifications'),
+    InlineKeyboardButton("Give me the word!", callback_data='give_me_the_word'),
     InlineKeyboardButton("Stats", callback_data='stats'),
     InlineKeyboardButton("Backup", callback_data='backup'),
     InlineKeyboardButton("Admin URL", callback_data='url'),

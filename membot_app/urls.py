@@ -12,5 +12,6 @@ urlpatterns = [
     path('show_answer/', views.show_answer),
     path('stats/', views.stats),
     path('backup/', views.backup),
+    path('give_me_the_word/', views.give_me_the_word),
 
 ]
