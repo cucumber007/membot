@@ -10,6 +10,7 @@ from membot_app import models
 START_TIME = 10
 END_TIME = 24
 
+
 def give_me_the_word(user):
     lexems = get_lexems_for_notification(user=user)
     return send_the_word(user, lexems, manual=True)
@@ -40,9 +41,9 @@ def notify_users(telegram_id):
 
 
 def get_lexems_for_notification(user):
-    res = models.Lexem.objects\
-        .filter(memorization__notify_at__lte=timezone.now())\
-        .filter(russian__isnull=False)\
+    res = models.Lexem.objects \
+        .filter(memorization__notify_at__lte=timezone.now()) \
+        .filter(russian__isnull=False) \
         .filter(english__isnull=False)
 
     if user:

@@ -60,6 +60,13 @@ def show_answer(update, query):
 
 
 def mark(update, query):
+    res = requests.post("http://127.0.0.1:8000/api/show_answer/", {
+        "telegram_id": update.effective_user.id,
+        "message_id": update.effective_message.message_id,
+        "lexem_id": update.effective_message.text.split("|")[0],
+    })
+    if res.status_code != 200:
+        raise Exception(res.text)
     requests.post("http://127.0.0.1:8000/api/mark/", {
         "telegram_id": update.effective_user.id,
         "lexem_id": update.effective_message.text.split("|")[0],
