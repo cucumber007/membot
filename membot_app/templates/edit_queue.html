@@ -5,7 +5,21 @@
     <title>Edit queue</title>
 </head>
 <body>
-Edit queue for user {{ data }}
- {{ data }}
+Edit queue for user {{ user }}
+<br/>
+<br/>
+{% for item in edit_queue_data %}
+     {{ item.0 }}
+    <br/>
+    {% for lex in item.1 %}
+        {{ lex }}
+        <br/>
+        {% endfor %}
+    <br/>
+    <br/>
+{% endfor %}
+
+
+
 </body>
 </html>

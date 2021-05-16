@@ -10,6 +10,7 @@ from telegram.error import BadRequest
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, CallbackContext
 
 from membot import settings
+from membot_app.utils import LOCAL_PROPERTIES
 from telegram_bot import keyboards, button_handlers
 from telegram_bot.formatters import LexemFormatter
 
@@ -35,22 +36,22 @@ class Bot:
         self.tg_bot = None
 
     def run(self):
-        try:
-            with open("local-properties.json", "r") as f:
-                token = json.loads(f.read())["token"]
-                updater = Updater(token=token, use_context=True)
-                dispatcher = updater.dispatcher
-                self.tg_bot = updater.bot
-                dispatcher.add_handler(CommandHandler("start", self.start))
-                dispatcher.add_handler(CommandHandler("trigger_notifications", self.trigger_notifications))
-                dispatcher.add_handler(MessageHandler(filters=Filters.text, callback=self.message))
-                dispatcher.add_handler(CallbackQueryHandler(self.button))
-
-                # dispatcher.add_error_handler(self.handle_error)
-
-                updater.start_polling()
-        except FileNotFoundError:
+        token = LOCAL_PROPERTIES.get("token")
+        if not token:
             print("token not found")
+            return
+        updater = Updater(token=token, use_context=True)
+        dispatcher = updater.dispatcher
+        self.tg_bot = updater.bot
+        dispatcher.add_handler(CommandHandler("start", self.start))
+        dispatcher.add_handler(CommandHandler("trigger_notifications", self.trigger_notifications))
+        dispatcher.add_handler(MessageHandler(filters=Filters.text, callback=self.message))
+        dispatcher.add_handler(CallbackQueryHandler(self.button))
+
+        # dispatcher.add_error_handler(self.handle_error)
+
+        updater.start_polling()
+
 
     def start(self, update, context):
         try:

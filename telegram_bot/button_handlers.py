@@ -4,8 +4,8 @@ import requests
 import telegram
 
 from membot import settings
-from membot_app import interactor
-from membot_app.utils import format_underscore
+from membot_app import interactor, utils
+from membot_app.utils import format_underscore, encrypt
 from telegram_bot import keyboards
 
 
@@ -83,6 +83,17 @@ def edit_lexem(update, query):
     query.message.reply_text(settings.ADMIN_URL+f"membot_app/lexem/{lexem_id}/change/")
 
 
+def edit_queue(update, query):
+    data = {
+        "telegram_id": update.effective_user.id
+    }
+    if interactor.is_local():
+        url = utils.LOCAL_ADMIN_URL
+    else:
+        url = settings.ADMIN_URL
+    query.message.reply_text(f"{url}/edit_queue?p={encrypt(json.dumps(data))}")
+
+
 handlers = {
     "show_commands": show_commands,
     "give_me_the_word": give_me_the_word,
@@ -93,6 +104,7 @@ handlers = {
     "mark_forgotten": mark,
     "url": url,
     "edit_lexem": edit_lexem,
+    "edit_queue": edit_queue,
 }
 
 

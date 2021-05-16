@@ -3,6 +3,7 @@ import re
 from _md5 import md5
 
 # Create your views here.
+from django.db.models import Q
 from django.views.generic import TemplateView
 from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
@@ -18,30 +19,7 @@ def on_lexem_received(request):
     data = request.POST
     user = get_user(request)
     text = data["text"]
-    if "//" in text:
-        context = text.split("//")[-1]
-        rest = "//".join(text.split("//")[:-1])
-    else:
-        context = None
-        rest = text
-    parts = re.split('--|—| - | -|- ', rest)
-    if len(parts) == 2:
-        part1 = parts[0]
-        part2 = parts[1]
-        if is_russian(part1):
-            russian = part1
-            english = part2
-        else:
-            russian = part2
-            english = part1
-    else:
-        part = "--".join(parts)
-        if is_russian(part):
-            russian = part
-            english = None
-        else:
-            english = part
-            russian = None
+    english, russian, context = interactor.parse_lexem(text)
     existant_rus, existant_eng = None, None
     if russian:
         existant_rus = list(models.Lexem.objects.filter(russian=russian, user=user))
@@ -135,5 +113,12 @@ class EditQueueView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['data'] = self.data
-        context['edit_queue'] = self.data
+        user = interactor.get_user_by_telegram_id(self.data["telegram_id"])
+        context['user'] = user
+        res = []
+        edit_queue_items = models.EditQueueItem.objects.filter(user=user).all()
+        for eq in edit_queue_items:
+            lexems = interactor.get_lexems_for_edit_queue(eq)
+            res.append([eq, lexems])
+        context['edit_queue_data'] = res
         return context

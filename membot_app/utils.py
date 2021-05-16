@@ -1,5 +1,14 @@
 import base64
+import json
 from datetime import timedelta
+
+try:
+    with open("local-properties.json", "r") as f:
+        LOCAL_PROPERTIES = json.loads(f.read())
+except FileNotFoundError:
+    LOCAL_PROPERTIES = {}
+
+LOCAL_ADMIN_URL = "http://127.0.0.1:8000"
 
 
 def timedelta_to_seconds(td):
@@ -22,8 +31,9 @@ def format_datetime(dt):
 
 # lol
 def encrypt(s):
-    return base64.b64encode(base64.b64encode(base64.b64encode(s)))
+    return base64.b64encode(base64.b64encode(base64.b64encode(s.encode("utf-8")))).decode("utf-8")
 
 
 def decrypt(s):
-    return base64.b64decode(base64.b64decode(base64.b64decode(s)))
+    return base64.b64decode(base64.b64decode(base64.b64decode(s.encode("utf-8")))).decode("utf-8")
+

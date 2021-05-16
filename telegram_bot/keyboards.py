@@ -41,4 +41,5 @@ commands = Keyboard([[
     InlineKeyboardButton("Stats", callback_data='stats'),
     InlineKeyboardButton("Backup", callback_data='backup'),
     InlineKeyboardButton("Admin URL", callback_data='url'),
+    InlineKeyboardButton("Edit queue URL", callback_data='edit_queue'),
 ]])

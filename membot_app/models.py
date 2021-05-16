@@ -55,6 +55,9 @@ class EditQueueItem(models.Model):
     def __str__(self):
         return self.raw
 
+    def __repr__(self):
+        return self.__str__()
+
 
 class Memorization(models.Model):
     user = models.ForeignKey(User, on_delete=CASCADE)

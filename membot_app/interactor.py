@@ -1,14 +1,44 @@
+import re
 from datetime import timedelta
 
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework.response import Response
 
-from membot_app.utils import format_datetime
+from membot_app.utils import format_datetime, LOCAL_PROPERTIES
 from telegram_bot import bot
 from membot_app import models
 
 START_TIME = 10
 END_TIME = 24
+
+
+def parse_lexem(text):
+    if "//" in text:
+        context = text.split("//")[-1]
+        rest = "//".join(text.split("//")[:-1])
+    else:
+        context = None
+        rest = text
+    parts = re.split('--|—| - | -|- ', rest)
+    if len(parts) == 2:
+        part1 = parts[0]
+        part2 = parts[1]
+        if is_russian(part1):
+            russian = part1
+            english = part2
+        else:
+            russian = part2
+            english = part1
+    else:
+        part = "--".join(parts)
+        if is_russian(part):
+            russian = part
+            english = None
+        else:
+            english = part
+            russian = None
+    return english, russian, context
 
 
 def give_me_the_word(user):
@@ -116,8 +146,23 @@ def get_stats(user):
     return Response(status=200, data=data)
 
 
+def get_lexems_for_edit_queue(edit_queue):
+    english, russian, _ = parse_lexem(edit_queue.raw)
+    en, ru = [], []
+    if english:
+        en = list(models.Lexem.objects.filter().filter(user=edit_queue.user, english=english))
+
+    if russian:
+        ru = list(models.Lexem.objects.filter().filter(user=edit_queue.user, english=english))
+    return en + ru
+
+
 def is_debug(user):
     return user.telegram_username in ["spqrta", "alinamanulova"]
+
+
+def is_local():
+    return LOCAL_PROPERTIES.get("local") is True
 
 
 def get_user(request):
@@ -130,6 +175,10 @@ def get_user(request):
         )
         user.save()
     return user
+
+
+def get_user_by_telegram_id(telegram_id):
+    return models.User.objects.filter(telegram_id=telegram_id).first()
 
 
 def is_russian(s):
